@@ -1,0 +1,43 @@
+/* src/styles/Dashboard.css */
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 2rem;
+}
+
+.welcome-container {
+  text-align: center;
+  max-width: 600px;
+}
+
+.welcome-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.welcome-content p {
+  font-size: 1.5rem;
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.btn-large {
+  padding: 1rem 3rem;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .welcome-content h1 {
+    font-size: 2rem;
+  }
+  
+  .welcome-content p {
+    font-size: 1.2rem;
+  }
+}
