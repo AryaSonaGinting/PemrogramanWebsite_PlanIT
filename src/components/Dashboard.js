@@ -1,8 +1,18 @@
-// src/components/Dashboard.js
-import React, { useState } from 'react';
+// src/components/Dashboard.js (updated)
+import React, { useState, useEffect } from 'react';
+import TaskManager from './TaskManager';
 
-const Dashboard = () => {
+const Dashboard = ({ onLogout }) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showMainDashboard, setShowMainDashboard] = useState(false);
+
+  // Check if user has already completed onboarding
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('planit-hasSeenOnboarding');
+    if (hasSeenOnboarding === 'true') {
+      setShowMainDashboard(true);
+    }
+  }, []);
 
   const welcomeMessages = [
     {
@@ -17,6 +27,26 @@ const Dashboard = () => {
     }
   ];
 
+  const handleNext = () => {
+    if (currentStep < welcomeMessages.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setShowMainDashboard(true);
+      localStorage.setItem('planit-hasSeenOnboarding', 'true');
+    }
+  };
+
+  const handleLogout = () => {
+    // Clear all user data
+    localStorage.removeItem('planit-hasSeenOnboarding');
+    // Note: We keep tasks in localStorage so they persist between logins
+    onLogout();
+  };
+
+  if (showMainDashboard) {
+    return <TaskManager onLogout={handleLogout} />;
+  }
+
   const styles = {
     dashboard: {
       minHeight: '100vh',
@@ -25,7 +55,21 @@ const Dashboard = () => {
       alignItems: 'center',
       justifyContent: 'center',
       color: 'white',
-      padding: '2rem'
+      padding: '2rem',
+      position: 'relative'
+    },
+    logoutButton: {
+      position: 'absolute',
+      top: '1rem',
+      right: '1rem',
+      background: 'rgba(255, 255, 255, 0.2)',
+      color: 'white',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      padding: '0.5rem 1rem',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontSize: '0.9rem',
+      transition: 'all 0.3s ease'
     },
     welcomeContainer: {
       textAlign: 'center',
@@ -55,16 +99,21 @@ const Dashboard = () => {
     }
   };
 
-  const handleNext = () => {
-    if (currentStep < welcomeMessages.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      console.log("Navigate to main dashboard");
-    }
-  };
-
   return (
     <div style={styles.dashboard}>
+      <button 
+        style={styles.logoutButton}
+        onClick={handleLogout}
+        onMouseEnter={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+        }}
+      >
+        Logout
+      </button>
+      
       <div style={styles.welcomeContainer}>
         <div style={styles.welcomeContent}>
           <h1 style={styles.welcomeTitle}>{welcomeMessages[currentStep].title}</h1>
