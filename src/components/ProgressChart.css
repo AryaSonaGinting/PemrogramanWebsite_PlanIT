@@ -1,0 +1,323 @@
+.progress-chart {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f1f1f1;
+  transition: all 0.3s ease;
+}
+
+.progress-chart:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.progress-chart-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Progress Circle */
+.progress-circle {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 2rem;
+}
+
+.progress-circle-bg {
+  fill: none;
+  stroke: #f0f0f0;
+  stroke-width: 10;
+}
+
+.progress-circle-fill {
+  fill: none;
+  stroke: url(#progressGradient);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Gradient for progress circle */
+.progress-circle svg {
+  filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.2));
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.progress-percent {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* Stats Section */
+.progress-stats {
+  margin-bottom: 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #333;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+}
+
+.stat-value.success {
+  color: #4CAF50;
+}
+
+.stat-value.warning {
+  color: #FF9800;
+}
+
+/* Category Section */
+.category-section,
+.upcoming-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upcoming-icon {
+  font-size: 1.2rem;
+}
+
+.category-list {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.category-item:last-child {
+  border-bottom: none;
+}
+
+.category-name {
+  color: #666;
+  font-weight: 500;
+}
+
+.category-count {
+  font-weight: 600;
+  color: #333;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  min-width: 36px;
+  text-align: center;
+}
+
+/* Upcoming Deadlines */
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upcoming-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.upcoming-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.upcoming-item.overdue {
+  border-left-color: #F44336;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.05) 0%, rgba(244, 67, 54, 0.02) 100%);
+}
+
+.upcoming-task-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.upcoming-datetime {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.date-info,
+.time-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.upcoming-time-until {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.upcoming-time-until.overdue-badge {
+  background: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+}
+
+/* Motivation Message */
+.motivation-message {
+  text-align: center;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.success-message {
+  color: #4CAF50;
+}
+
+.good-message {
+  color: #FF9800;
+}
+
+.okay-message {
+  color: #2196F3;
+}
+
+.progress-message {
+  color: #667eea;
+}
+
+.start-message {
+  color: #666;
+}
+
+/* Scrollbar Styling */
+.progress-chart::-webkit-scrollbar {
+  width: 6px;
+}
+
+.progress-chart::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.progress-chart::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+}
+
+.progress-chart::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .progress-chart {
+    padding: 1.5rem;
+    max-height: none;
+  }
+  
+  .progress-chart-title {
+    font-size: 1.25rem;
+  }
+  
+  .progress-circle {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .progress-percent {
+    font-size: 1.75rem;
+  }
+  
+  .upcoming-datetime {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+/* SVG Gradient Definition */
+.progress-circle svg defs {
+  display: block;
+}
+
+/* Empty State */
+.progress-chart:empty::before {
+  content: "Tidak ada data progress";
+  display: block;
+  text-align: center;
+  color: #999;
+  padding: 2rem;
+  font-style: italic;
+}
