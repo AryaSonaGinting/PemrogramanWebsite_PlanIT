@@ -1,437 +1,318 @@
-.task-manager {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
-  color: white;
-  position: relative;
-  overflow-x: hidden;
-}
+import React, { useState, useEffect } from 'react';
+import TaskForm from './TaskForm';
+import TaskList from './TaskList';
+import ProgressChart from './ProgressChart';
+import Notification from './Notification';
+import Clock from './Clock';
+import Profile from './Profile';
 
-.task-manager::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-}
+const TaskManager = ({ onLogout, onSwitchAccount }) => { // Add onSwitchAccount prop
+  const [tasks, setTasks] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const [user, setUser] = useState({ name: 'User', email: 'user@example.com' });
 
-.task-manager-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
+  // Load user data from session
+  useEffect(() => {
+    const sessionData = localStorage.getItem('planit-session');
+    if (sessionData) {
+      const session = JSON.parse(sessionData);
+      if (session.user) {
+        setUser(session.user);
+      }
+    }
+  }, []);
 
-/* Header Styles */
-.task-manager-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 3rem;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
+  // Load tasks from localStorage on component mount
+  useEffect(() => {
+    const savedTasks = localStorage.getItem('planit-tasks');
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+    }
+  }, []);
 
-@media (max-width: 1024px) {
-  .task-manager-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
+  // Save tasks to localStorage whenever tasks change
+  useEffect(() => {
+    localStorage.setItem('planit-tasks', JSON.stringify(tasks));
+    checkTaskNotifications();
+  }, [tasks]);
 
-.header-left {
-  flex: 1;
-  min-width: 300px;
-}
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
-.app-title {
-  font-size: 2.75rem;
-  font-weight: 800;
-  margin: 0 0 0.5rem 0;
-  background: linear-gradient(to right, #ffffff, #e6e6e6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
+  const checkTaskNotifications = () => {
+    const now = new Date();
+    tasks.forEach(task => {
+      if (!task.completed && task.deadline) {
+        const deadline = new Date(task.deadline);
+        const timeDiff = deadline.getTime() - now.getTime();
+        const minutesDiff = timeDiff / (1000 * 60);
+        
+        if (minutesDiff <= 60 && minutesDiff > 0 && !task.notified) {
+          showNotification(
+            `Task "${task.title}" deadline dalam ${Math.ceil(minutesDiff)} menit!`, 
+            'warning'
+          );
+          setTasks(prev => prev.map(t => 
+            t.id === task.id ? {...t, notified: true} : t
+          ));
+        }
+      }
+    });
+  };
 
-.app-subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  margin: 0 0 1.5rem 0;
-  font-weight: 400;
-}
+  const addTask = (taskData) => {
+    const newTask = {
+      id: Date.now().toString(),
+      ...taskData,
+      completed: false,
+      createdAt: new Date().toISOString(),
+      notified: false
+    };
+    setTasks(prev => [...prev, newTask]);
+    showNotification('Task berhasil ditambahkan!', 'success');
+    setShowForm(false);
+  };
 
-.quick-stats {
-  display: flex;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
+  const updateTask = (taskId, updates) => {
+    setTasks(prev => prev.map(task => 
+      task.id === taskId ? { ...task, ...updates } : task
+    ));
+    showNotification('Task berhasil diperbarui!', 'success');
+    setEditingTask(null);
+    setShowForm(false);
+  };
 
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  background: rgba(255, 255, 255, 0.1);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  padding: 1rem 1.5rem;
-  min-width: 120px;
-  transition: all 0.3s ease;
-}
+  const deleteTask = (taskId) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+    showNotification('Task berhasil dihapus!', 'success');
+  };
 
-.stat-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-}
+  const toggleTaskCompletion = (taskId) => {
+    setTasks(prev => prev.map(task => 
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    ));
+  };
 
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-}
+  const startEditing = (task) => {
+    setEditingTask(task);
+    setShowForm(true);
+  };
 
-.stat-value.success {
-  color: #4CAF50;
-}
+  const cancelEditing = () => {
+    setEditingTask(null);
+    setShowForm(false);
+  };
 
-.stat-value.warning {
-  color: #FF9800;
-}
+  const calculateProgress = () => {
+    if (tasks.length === 0) return 0;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    return Math.round((completedTasks / tasks.length) * 100);
+  };
 
-.stat-label {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  font-weight: 500;
-}
+  const handleProfileClick = () => {
+    setShowProfile(true);
+  };
 
-.header-right {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  align-items: flex-end;
-}
+  const handleCloseProfile = () => {
+    setShowProfile(false);
+  };
 
-@media (max-width: 1024px) {
-  .header-right {
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-  }
-}
+  const styles = {
+    taskManager: {
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '2rem'
+    },
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto'
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: '2rem',
+      color: 'white',
+      position: 'relative'
+    },
+    headerLeft: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem'
+    },
+    title: {
+      fontSize: '2.5rem',
+      fontWeight: 'bold'
+    },
+    subtitle: {
+      fontSize: '1rem',
+      opacity: 0.9
+    },
+    headerRight: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '2rem'
+    },
+    profileButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      background: 'rgba(255, 255, 255, 0.2)',
+      color: 'white',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      padding: '0.5rem 1rem',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontSize: '0.9rem',
+      transition: 'all 0.3s ease'
+    },
+    avatarSmall: {
+      width: '30px',
+      height: '30px',
+      borderRadius: '50%',
+      background: 'white',
+      color: '#667eea',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: 'bold',
+      fontSize: '0.9rem'
+    },
+    btnPrimary: {
+      background: 'white',
+      color: '#667eea',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '1rem',
+      transition: 'all 0.3s ease'
+    },
+    content: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 400px',
+      gap: '2rem',
+      alignItems: 'start'
+    },
+    mainContent: {
+      background: 'white',
+      borderRadius: '20px',
+      padding: '2rem',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
+    },
+    sidebar: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '2rem'
+    },
+    overlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      zIndex: 999
+    }
+  };
 
-.header-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
+  return (
+    <div style={styles.taskManager}>
+      <div style={styles.container}>
+        <header style={styles.header}>
+          <div style={styles.headerLeft}>
+            <h1 style={styles.title}>PlanIt Dashboard</h1>
+            <p style={styles.subtitle}>Kelola tugas Anda dengan mudah</p>
+          </div>
+          
+          <div style={styles.headerRight}>
+            <Clock />
+            <button 
+              style={styles.profileButton}
+              onClick={handleProfileClick}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+              }}
+            >
+              <div style={styles.avatarSmall}>
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <span>{user.name || 'User'}</span>
+            </button>
+            <button 
+              style={styles.btnPrimary}
+              onClick={() => setShowForm(true)}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              + Tambah Task
+            </button>
+          </div>
+        </header>
 
-.logout-button,
-.add-task-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-}
+        <div style={styles.content}>
+          <div style={styles.mainContent}>
+            {showForm ? (
+              <TaskForm 
+                task={editingTask}
+                onSave={editingTask ? updateTask : addTask}
+                onCancel={cancelEditing}
+              />
+            ) : (
+              <TaskList 
+                tasks={tasks}
+                onEdit={startEditing}
+                onDelete={deleteTask}
+                onToggleComplete={toggleTaskCompletion}
+              />
+            )}
+          </div>
 
-.logout-button {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
+          <div style={styles.sidebar}>
+            <ProgressChart 
+              tasks={tasks}
+              progress={calculateProgress()}
+            />
+          </div>
+        </div>
+      </div>
 
-.logout-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+      {showProfile && (
+        <>
+          <div style={styles.overlay} onClick={handleCloseProfile} />
+          <Profile 
+            user={user}
+            onClose={handleCloseProfile}
+            onLogout={onLogout}
+            onSwitchToLogin={onSwitchAccount} // ADD THIS LINE
+          />
+        </>
+      )}
 
-.add-task-button {
-  background: white;
-  color: #667eea;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-}
+      {notification && (
+        <Notification 
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+    </div>
+  );
+};
 
-.add-task-button:hover {
-  background: #f8f9fa;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
-
-.button-icon {
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-/* Main Content */
-.task-manager-content {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 2rem;
-  align-items: start;
-}
-
-@media (max-width: 1200px) {
-  .task-manager-content {
-    grid-template-columns: 1fr;
-  }
-}
-
-.main-content {
-  background: white;
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  animation: slideUp 0.5s ease;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Form Section */
-.form-section {
-  padding: 2.5rem;
-}
-
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e1e1e1;
-}
-
-.form-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0;
-}
-
-.close-form-button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #666;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.close-form-button:hover {
-  background: #f8f9fa;
-  color: #333;
-}
-
-/* List Section */
-.list-section {
-  padding: 2.5rem;
-}
-
-.list-header {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e1e1e1;
-}
-
-.list-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 0.75rem 0;
-}
-
-.list-summary {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.summary-text {
-  color: #666;
-  font-size: 0.95rem;
-  font-weight: 500;
-  background: #f8f9fa;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-}
-
-/* Sidebar */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 2rem;
-}
-
-/* Quick Tips */
-.quick-tips {
-  background: white;
-  border-radius: 24px;
-  padding: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.tips-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.tips-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.tip-item {
-  padding: 0.75rem 0;
-  color: #666;
-  font-size: 0.95rem;
-  border-bottom: 1px solid #f0f0f0;
-  position: relative;
-  padding-left: 1.5rem;
-}
-
-.tip-item:last-child {
-  border-bottom: none;
-}
-
-.tip-item::before {
-  content: '•';
-  color: #667eea;
-  font-weight: bold;
-  position: absolute;
-  left: 0;
-  font-size: 1.2rem;
-}
-
-/* Loading Overlay */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-text {
-  color: white;
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .task-manager {
-    padding: 1.5rem;
-  }
-  
-  .app-title {
-    font-size: 2rem;
-  }
-  
-  .quick-stats {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .stat-item {
-    min-width: 100%;
-  }
-  
-  .form-section,
-  .list-section {
-    padding: 1.5rem;
-  }
-  
-  .quick-tips {
-    padding: 1.5rem;
-  }
-  
-  .header-actions {
-    width: 100%;
-  }
-  
-  .logout-button,
-  .add-task-button {
-    flex: 1;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .task-manager-header {
-    gap: 1.5rem;
-  }
-  
-  .app-title {
-    font-size: 1.75rem;
-  }
-  
-  .quick-stats {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Focus Styles */
-.logout-button:focus-visible,
-.add-task-button:focus-visible,
-.close-form-button:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 2px;
-}
+export default TaskManager;
