@@ -16,7 +16,6 @@
   }
 }
 
-/* Form Groups */
 .form-group {
   margin-bottom: 1.75rem;
   position: relative;
@@ -34,7 +33,6 @@
   color: #F44336;
 }
 
-/* Form Inputs */
 .form-input,
 .form-textarea,
 .form-select {
@@ -68,7 +66,6 @@
   line-height: 1.5;
 }
 
-/* Error Messages */
 .form-error {
   color: #F44336;
   font-size: 0.85rem;
@@ -95,25 +92,18 @@
   }
 }
 
-/* Deadline Container */
 .deadline-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
   margin-bottom: 0.75rem;
-}
-
-@media (max-width: 768px) {
-  .deadline-container {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
 }
 
 .date-input-container,
 .time-input-container {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .date-input-container .form-label,
@@ -121,7 +111,6 @@
   margin-bottom: 0.75rem;
 }
 
-/* Time Input Toggle */
 .time-input-toggle {
   display: flex;
   gap: 0.5rem;
@@ -154,7 +143,6 @@
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-/* Manual Time Input */
 .manual-time-input {
   display: flex;
   align-items: center;
@@ -171,7 +159,6 @@
   white-space: nowrap;
 }
 
-/* Form Hint */
 .form-hint {
   color: #666;
   font-size: 0.85rem;
@@ -187,7 +174,6 @@
   margin-right: 0.5rem;
 }
 
-/* Priority Options */
 .priority-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -296,13 +282,11 @@
   font-weight: bold;
 }
 
-/* Placeholder Styling */
 ::placeholder {
   color: #aaa;
   opacity: 1;
 }
 
-/* Focus Styles for Accessibility */
 .form-input:focus-visible,
 .form-textarea:focus-visible,
 .form-select:focus-visible,
@@ -312,7 +296,6 @@
   outline-offset: 2px;
 }
 
-/* Custom Date Picker Icon */
 input[type="date"]::-webkit-calendar-picker-indicator {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
   cursor: pointer;
@@ -324,7 +307,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   background-color: rgba(102, 126, 234, 0.1);
 }
 
-/* Custom Select Arrow */
 .form-select {
   appearance: none;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
