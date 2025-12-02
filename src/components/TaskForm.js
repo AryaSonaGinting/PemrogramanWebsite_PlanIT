@@ -11,12 +11,11 @@ const TaskForm = ({ task, onSave, onCancel }) => {
     priority: 'Medium'
   });
 
-  const [timeInputType, setTimeInputType] = useState('dropdown'); // 'dropdown' or 'manual'
+  const [timeInputType, setTimeInputType] = useState('dropdown');
   const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     if (task) {
-      // Extract date and time from existing deadline
       let deadlineDate = '';
       let deadlineTime = '';
       
@@ -69,7 +68,6 @@ const TaskForm = ({ task, onSave, onCancel }) => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
@@ -81,16 +79,12 @@ const TaskForm = ({ task, onSave, onCancel }) => {
   const handleTimeInputChange = (e) => {
     let value = e.target.value;
     
-    // Allow partial input while typing
-    // Remove any non-digit characters except colon
     value = value.replace(/[^0-9:]/g, '');
     
-    // Auto-insert colon after 2 digits if no colon yet
     if (value.length === 2 && !value.includes(':')) {
       value = value + ':';
     }
     
-    // Limit to 5 characters (HH:MM)
     if (value.length > 5) {
       value = value.substring(0, 5);
     }
@@ -100,7 +94,6 @@ const TaskForm = ({ task, onSave, onCancel }) => {
       deadlineTime: value
     }));
 
-    // Clear time error when user types
     if (formErrors.deadlineTime) {
       setFormErrors(prev => ({
         ...prev,
@@ -123,20 +116,18 @@ const TaskForm = ({ task, onSave, onCancel }) => {
       return;
     }
 
-    // Format time with leading zeros
     let formattedTime = formData.deadlineTime;
     if (formattedTime && formattedTime.trim() !== '') {
       const [hours, minutes] = formattedTime.split(':');
       formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
 
-    // Combine date and time for deadline
     let deadline = '';
     if (formData.deadlineDate) {
       if (formattedTime) {
         deadline = `${formData.deadlineDate}T${formattedTime}:00`;
       } else {
-        deadline = `${formData.deadlineDate}T23:59:59`; // Default to end of day
+        deadline = `${formData.deadlineDate}T23:59:59`;
       }
     }
 
@@ -156,7 +147,7 @@ const TaskForm = ({ task, onSave, onCancel }) => {
   const generateTimeOptions = () => {
     const times = [];
     for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) { // 30-minute intervals
+      for (let minute = 0; minute < 60; minute += 30) {
         const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
         times.push(timeString);
       }
@@ -166,7 +157,6 @@ const TaskForm = ({ task, onSave, onCancel }) => {
 
   const timeOptions = generateTimeOptions();
 
-  // Get tomorrow's date for min date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
