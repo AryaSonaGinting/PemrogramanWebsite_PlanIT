@@ -1,4 +1,3 @@
-// src/components/LoginPage.js
 import React, { useState } from 'react';
 
 const LoginPage = ({ onNavigate, onLogin }) => {
@@ -105,10 +104,10 @@ const LoginPage = ({ onNavigate, onLogin }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Login data:', formData);
-    onLogin();
-  };
+  e.preventDefault();
+  console.log('Login data:', formData);
+  onLogin(formData.email);
+};
 
   return (
     <div style={styles.loginPage}>
