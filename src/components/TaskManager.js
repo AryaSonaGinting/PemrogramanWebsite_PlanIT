@@ -4,43 +4,41 @@ import TaskList from './TaskList';
 import ProgressChart from './ProgressChart';
 import Notification from './Notification';
 import Clock from './Clock';
-import './TaskManager.css';
+import Profile from './Profile';
 
-const TaskManager = ({ onLogout }) => {
+const TaskManager = ({ onLogout, onSwitchAccount }) => {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [notification, setNotification] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
+  const [user, setUser] = useState({ name: 'User', email: 'user@example.com' });
 
-  // Load tasks from localStorage on component mount
+  useEffect(() => {
+    const sessionData = localStorage.getItem('planit-session');
+    if (sessionData) {
+      const session = JSON.parse(sessionData);
+      if (session.user) {
+        setUser(session.user);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const savedTasks = localStorage.getItem('planit-tasks');
     if (savedTasks) {
-      try {
-        setTasks(JSON.parse(savedTasks));
-      } catch (error) {
-        console.error('Error loading tasks from localStorage:', error);
-        setTasks([]);
-      }
+      setTasks(JSON.parse(savedTasks));
     }
-    setLoading(false);
   }, []);
 
-  // Save tasks to localStorage whenever tasks change
   useEffect(() => {
-    if (!loading) {
-      try {
-        localStorage.setItem('planit-tasks', JSON.stringify(tasks));
-      } catch (error) {
-        console.error('Error saving tasks to localStorage:', error);
-      }
-      checkTaskNotifications();
-    }
-  }, [tasks, loading]);
+    localStorage.setItem('planit-tasks', JSON.stringify(tasks));
+    checkTaskNotifications();
+  }, [tasks]);
 
   const showNotification = (message, type = 'info') => {
     setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
   };
 
   const checkTaskNotifications = () => {
@@ -51,7 +49,6 @@ const TaskManager = ({ onLogout }) => {
         const timeDiff = deadline.getTime() - now.getTime();
         const minutesDiff = timeDiff / (1000 * 60);
         
-        // Notify for deadlines within 1 hour and not already notified
         if (minutesDiff <= 60 && minutesDiff > 0 && !task.notified) {
           showNotification(
             `Task "${task.title}" deadline dalam ${Math.ceil(minutesDiff)} menit!`, 
@@ -59,13 +56,6 @@ const TaskManager = ({ onLogout }) => {
           );
           setTasks(prev => prev.map(t => 
             t.id === task.id ? {...t, notified: true} : t
-          ));
-        }
-        
-        // Reset notification flag if deadline is in the future
-        if (minutesDiff > 60 && task.notified) {
-          setTasks(prev => prev.map(t => 
-            t.id === task.id ? {...t, notified: false} : t
           ));
         }
       }
@@ -121,149 +111,202 @@ const TaskManager = ({ onLogout }) => {
     return Math.round((completedTasks / tasks.length) * 100);
   };
 
-  const handleLogout = () => {
-    showNotification('Berhasil logout!', 'success');
-    setTimeout(() => {
-      onLogout();
-    }, 1000);
+  const handleProfileClick = () => {
+    setShowProfile(true);
   };
 
-  const handleAddTask = () => {
-    setEditingTask(null);
-    setShowForm(true);
+  const handleCloseProfile = () => {
+    setShowProfile(false);
   };
 
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const overdueTasks = tasks.filter(task => {
-    if (task.completed || !task.deadline) return false;
-    return new Date(task.deadline) < new Date();
-  }).length;
+  const styles = {
+    taskManager: {
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '2rem'
+    },
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto'
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: '2rem',
+      color: 'white',
+      position: 'relative'
+    },
+    headerLeft: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem'
+    },
+    title: {
+      fontSize: '2.5rem',
+      fontWeight: 'bold'
+    },
+    subtitle: {
+      fontSize: '1rem',
+      opacity: 0.9
+    },
+    headerRight: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '2rem'
+    },
+    profileButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      background: 'rgba(255, 255, 255, 0.2)',
+      color: 'white',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      padding: '0.5rem 1rem',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontSize: '0.9rem',
+      transition: 'all 0.3s ease'
+    },
+    avatarSmall: {
+      width: '30px',
+      height: '30px',
+      borderRadius: '50%',
+      background: 'white',
+      color: '#667eea',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: 'bold',
+      fontSize: '0.9rem'
+    },
+    btnPrimary: {
+      background: 'white',
+      color: '#667eea',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '1rem',
+      transition: 'all 0.3s ease'
+    },
+    content: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 400px',
+      gap: '2rem',
+      alignItems: 'start'
+    },
+    mainContent: {
+      background: 'white',
+      borderRadius: '20px',
+      padding: '2rem',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
+    },
+    sidebar: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '2rem'
+    },
+    overlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      zIndex: 999
+    }
+  };
 
   return (
-    <div className="task-manager">
-      <div className="task-manager-container">
-        {/* Header */}
-        <header className="task-manager-header">
-          <div className="header-left">
-            <h1 className="app-title">PlanIt Dashboard</h1>
-            <p className="app-subtitle">Kelola tugas Anda dengan mudah dan efisien</p>
-            
-            <div className="quick-stats">
-              <div className="stat-item">
-                <span className="stat-value">{totalTasks}</span>
-                <span className="stat-label">Total Task</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value success">{completedTasks}</span>
-                <span className="stat-label">Selesai</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value warning">{overdueTasks}</span>
-                <span className="stat-label">Terlambat</span>
-              </div>
-            </div>
+    <div style={styles.taskManager}>
+      <div style={styles.container}>
+        <header style={styles.header}>
+          <div style={styles.headerLeft}>
+            <h1 style={styles.title}>PlanIt Dashboard</h1>
+            <p style={styles.subtitle}>Kelola tugas Anda dengan mudah</p>
           </div>
           
-          <div className="header-right">
+          <div style={styles.headerRight}>
             <Clock />
-            <div className="header-actions">
-              <button 
-                className="logout-button"
-                onClick={handleLogout}
-              >
-                <span className="button-icon">←</span>
-                Logout
-              </button>
-              <button 
-                className="add-task-button"
-                onClick={handleAddTask}
-              >
-                <span className="button-icon">+</span>
-                Tambah Task
-              </button>
-            </div>
+            <button 
+              style={styles.profileButton}
+              onClick={handleProfileClick}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+              }}
+            >
+              <div style={styles.avatarSmall}>
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <span>{user.name || 'User'}</span>
+            </button>
+            <button 
+              style={styles.btnPrimary}
+              onClick={() => setShowForm(true)}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              + Tambah Task
+            </button>
           </div>
         </header>
 
-        {/* Main Content */}
-        <div className="task-manager-content">
-          <div className="main-content">
+        <div style={styles.content}>
+          <div style={styles.mainContent}>
             {showForm ? (
-              <div className="form-section">
-                <div className="form-header">
-                  <h2 className="form-title">
-                    {editingTask ? 'Edit Task' : 'Tambah Task Baru'}
-                  </h2>
-                  <button 
-                    className="close-form-button"
-                    onClick={cancelEditing}
-                  >
-                    ✕
-                  </button>
-                </div>
-                <TaskForm 
-                  task={editingTask}
-                  onSave={editingTask ? updateTask : addTask}
-                  onCancel={cancelEditing}
-                />
-              </div>
+              <TaskForm 
+                task={editingTask}
+                onSave={editingTask ? updateTask : addTask}
+                onCancel={cancelEditing}
+              />
             ) : (
-              <div className="list-section">
-                <div className="list-header">
-                  <h2 className="list-title">Daftar Task Anda</h2>
-                  <div className="list-summary">
-                    <span className="summary-text">
-                      {totalTasks} task • {completedTasks} selesai • {overdueTasks} terlambat
-                    </span>
-                  </div>
-                </div>
-                <TaskList 
-                  tasks={tasks}
-                  onEdit={startEditing}
-                  onDelete={deleteTask}
-                  onToggleComplete={toggleTaskCompletion}
-                />
-              </div>
+              <TaskList 
+                tasks={tasks}
+                onEdit={startEditing}
+                onDelete={deleteTask}
+                onToggleComplete={toggleTaskCompletion}
+              />
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="sidebar">
+          <div style={styles.sidebar}>
             <ProgressChart 
               tasks={tasks}
               progress={calculateProgress()}
             />
-            
-            {/* Quick Tips Section */}
-            <div className="quick-tips">
-              <h3 className="tips-title">💡 Tips Produktif</h3>
-              <ul className="tips-list">
-                <li className="tip-item">Prioritaskan task dengan deadline terdekat</li>
-                <li className="tip-item">Break down task besar menjadi sub-task kecil</li>
-                <li className="tip-item">Gunakan reminder untuk deadline penting</li>
-                <li className="tip-item">Review progress harian di akhir hari</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Notification */}
+      {showProfile && (
+        <>
+          <div style={styles.overlay} onClick={handleCloseProfile} />
+          <Profile 
+            user={user}
+            onClose={handleCloseProfile}
+            onLogout={onLogout}
+            onSwitchToLogin={onSwitchAccount} // ADD THIS LINE
+          />
+        </>
+      )}
+
       {notification && (
         <Notification 
           message={notification.message}
           type={notification.type}
           onClose={() => setNotification(null)}
         />
-      )}
-
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="loading-overlay">
-          <div className="loading-spinner"></div>
-          <span className="loading-text">Memuat task...</span>
-        </div>
       )}
     </div>
   );
