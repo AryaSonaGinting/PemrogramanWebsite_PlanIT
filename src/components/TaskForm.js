@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './TaskForm.css';
 
 const TaskForm = ({ task, onSave, onCancel }) => {
@@ -13,6 +13,53 @@ const TaskForm = ({ task, onSave, onCancel }) => {
 
   const [timeInputType, setTimeInputType] = useState('dropdown');
   const [formErrors, setFormErrors] = useState({});
+  const formRef = useRef(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+  const checkScrollPosition = () => {
+    if (formRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = formRef.current;
+      setShowScrollTop(scrollTop > 100);
+      setShowScrollBottom(scrollTop < scrollHeight - clientHeight - 100);
+    }
+  };
+
+  const scrollToTop = () => {
+    if (formRef.current) {
+      formRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (formRef.current) {
+      formRef.current.scrollTo({
+        top: formRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    const formElement = formRef.current;
+    if (formElement) {
+      formElement.addEventListener('scroll', checkScrollPosition);
+      setTimeout(checkScrollPosition, 100);
+    }
+
+    return () => {
+      if (formElement) {
+        formElement.removeEventListener('scroll', checkScrollPosition);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    setTimeout(checkScrollPosition, 100);
+  }, [formData]);
 
   useEffect(() => {
     if (task) {
@@ -78,7 +125,6 @@ const TaskForm = ({ task, onSave, onCancel }) => {
 
   const handleTimeInputChange = (e) => {
     let value = e.target.value;
-    
     value = value.replace(/[^0-9:]/g, '');
     
     if (value.length === 2 && !value.includes(':')) {
@@ -156,180 +202,195 @@ const TaskForm = ({ task, onSave, onCancel }) => {
   };
 
   const timeOptions = generateTimeOptions();
-
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
 
   return (
-    <form className="task-form" onSubmit={handleSubmit}>
-      {/* Title Input */}
-      <div className="form-group">
-        <label className="form-label">
-          Judul Task <span className="required">*</span>
-        </label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Masukkan judul task..."
-          required
-          className={`form-input ${formErrors.title ? 'error' : ''}`}
-        />
-        {formErrors.title && (
-          <div className="form-error">{formErrors.title}</div>
-        )}
-      </div>
-
-      {/* Description Input */}
-      <div className="form-group">
-        <label className="form-label">Deskripsi</label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Masukkan deskripsi task (opsional)..."
-          className="form-textarea"
-          rows="4"
-        />
-      </div>
-
-      {/* Category Select */}
-      <div className="form-group">
-        <label className="form-label">Kategori</label>
-        <select
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          className="form-select"
+    <div className="task-form-container" ref={formRef}>
+      {showScrollTop && (
+        <button 
+          className="scroll-button scroll-top"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
         >
-          {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-      </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+      )}
 
-      {/* Deadline Section */}
-      <div className="form-group">
-        <label className="form-label">Deadline</label>
-        
-        <div className="deadline-container">
-          {/* Date Input */}
-          <div className="date-input-container">
-            <label className="form-label">Tanggal</label>
-            <input
-              type="date"
-              name="deadlineDate"
-              value={formData.deadlineDate}
-              onChange={handleChange}
-              className="form-input"
-              min={minDate}
-            />
+      {showScrollBottom && (
+        <button 
+          className="scroll-button scroll-bottom"
+          onClick={scrollToBottom}
+          aria-label="Scroll to bottom"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      )}
+
+      <form className="task-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label className="form-label">
+            Judul Task <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Masukkan judul task..."
+            required
+            className={`form-input ${formErrors.title ? 'error' : ''}`}
+          />
+          {formErrors.title && (
+            <div className="form-error">{formErrors.title}</div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Deskripsi</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Masukkan deskripsi task (opsional)..."
+            className="form-textarea"
+            rows="4"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Kategori</label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="form-select"
+          >
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Deadline</label>
+          
+          <div className="deadline-container">
+            <div className="date-input-container">
+              <label className="form-label">Tanggal</label>
+              <input
+                type="date"
+                name="deadlineDate"
+                value={formData.deadlineDate}
+                onChange={handleChange}
+                className="form-input"
+                min={minDate}
+              />
+            </div>
+            
+            <div className="time-input-container">
+              <label className="form-label">Waktu</label>
+              
+              <div className="time-input-toggle">
+                <button
+                  type="button"
+                  className={`time-toggle-button ${timeInputType === 'dropdown' ? 'active' : ''}`}
+                  onClick={() => setTimeInputType('dropdown')}
+                >
+                  Pilih
+                </button>
+                <button
+                  type="button"
+                  className={`time-toggle-button ${timeInputType === 'manual' ? 'active' : ''}`}
+                  onClick={() => setTimeInputType('manual')}
+                >
+                  Ketik
+                </button>
+              </div>
+
+              {timeInputType === 'dropdown' ? (
+                <select
+                  name="deadlineTime"
+                  value={formData.deadlineTime}
+                  onChange={handleChange}
+                  className={`form-select ${formErrors.deadlineTime ? 'error' : ''}`}
+                >
+                  <option value="">Pilih Waktu</option>
+                  {timeOptions.map(time => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="manual-time-input">
+                  <input
+                    type="text"
+                    name="deadlineTimeManual"
+                    value={formData.deadlineTime}
+                    onChange={handleTimeInputChange}
+                    placeholder="HH:MM"
+                    className={`form-input ${formErrors.deadlineTime ? 'error' : ''}`}
+                    maxLength="5"
+                  />
+                  <span className="time-format-hint">Contoh: 14:30</span>
+                </div>
+              )}
+              
+              {formErrors.deadlineTime && (
+                <div className="form-error">{formErrors.deadlineTime}</div>
+              )}
+            </div>
           </div>
           
-          {/* Time Input */}
-          <div className="time-input-container">
-            <label className="form-label">Waktu</label>
-            
-            {/* Time Input Type Toggle */}
-            <div className="time-input-toggle">
-              <button
-                type="button"
-                className={`time-toggle-button ${timeInputType === 'dropdown' ? 'active' : ''}`}
-                onClick={() => setTimeInputType('dropdown')}
-              >
-                Pilih
-              </button>
-              <button
-                type="button"
-                className={`time-toggle-button ${timeInputType === 'manual' ? 'active' : ''}`}
-                onClick={() => setTimeInputType('manual')}
-              >
-                Ketik
-              </button>
-            </div>
-
-            {/* Time Input */}
-            {timeInputType === 'dropdown' ? (
-              <select
-                name="deadlineTime"
-                value={formData.deadlineTime}
-                onChange={handleChange}
-                className={`form-select ${formErrors.deadlineTime ? 'error' : ''}`}
-              >
-                <option value="">Pilih Waktu</option>
-                {timeOptions.map(time => (
-                  <option key={time} value={time}>
-                    {time}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="manual-time-input">
-                <input
-                  type="text"
-                  name="deadlineTimeManual"
-                  value={formData.deadlineTime}
-                  onChange={handleTimeInputChange}
-                  placeholder="HH:MM"
-                  className={`form-input ${formErrors.deadlineTime ? 'error' : ''}`}
-                  maxLength="5"
-                />
-                <span className="time-format-hint">Contoh: 14:30</span>
-              </div>
-            )}
-            
-            {formErrors.deadlineTime && (
-              <div className="form-error">{formErrors.deadlineTime}</div>
-            )}
+          <div className="form-hint">
+            ⓘ Kosongkan waktu untuk mengatur deadline sampai akhir hari (23:59)
           </div>
         </div>
-        
-        <div className="form-hint">
-          ⓘ Kosongkan waktu untuk mengatur deadline sampai akhir hari (23:59)
-        </div>
-      </div>
 
-      {/* Priority Selection */}
-      <div className="form-group">
-        <label className="form-label">Prioritas</label>
-        <div className="priority-options">
-          {priorities.map(priority => (
-            <div
-              key={priority.value}
-              className={`priority-option ${formData.priority === priority.value ? 'selected' : ''}`}
-              style={{
-                '--priority-color': priority.color,
-                '--priority-light-color': `${priority.color}20`
-              }}
-              onClick={() => handlePrioritySelect(priority.value)}
-            >
-              <div className="priority-indicator"></div>
-              <span className="priority-label">{priority.label}</span>
-            </div>
-          ))}
+        <div className="form-group">
+          <label className="form-label">Prioritas</label>
+          <div className="priority-options">
+            {priorities.map(priority => (
+              <div
+                key={priority.value}
+                className={`priority-option ${formData.priority === priority.value ? 'selected' : ''}`}
+                style={{
+                  '--priority-color': priority.color,
+                  '--priority-light-color': `${priority.color}20`
+                }}
+                onClick={() => handlePrioritySelect(priority.value)}
+              >
+                <div className="priority-indicator"></div>
+                <span className="priority-label">{priority.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Form Buttons */}
-      <div className="form-buttons">
-        <button 
-          type="button" 
-          className="btn btn-secondary"
-          onClick={onCancel}
-        >
-          Batal
-        </button>
-        <button 
-          type="submit"
-          className="btn btn-primary"
-        >
-          <span className="btn-icon">✓</span>
-          {task ? 'Update Task' : 'Simpan Task'}
-        </button>
-      </div>
-    </form>
+        <div className="form-buttons">
+          <button 
+            type="button" 
+            className="btn btn-secondary"
+            onClick={onCancel}
+          >
+            Batal
+          </button>
+          <button 
+            type="submit"
+            className="btn btn-primary"
+          >
+            <span className="btn-icon">✓</span>
+            {task ? 'Update Task' : 'Simpan Task'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
