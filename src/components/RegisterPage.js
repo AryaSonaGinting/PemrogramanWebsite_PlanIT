@@ -1,4 +1,3 @@
-// src/components/RegisterPage.js
 import React, { useState } from 'react';
 
 const RegisterPage = ({ onNavigate, onRegister }) => {
@@ -96,9 +95,9 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Register data:', formData);
-    onRegister();
+  e.preventDefault();
+  console.log('Register data:', formData);
+  onRegister(formData);
   };
 
   return (
