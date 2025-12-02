@@ -1,7 +1,7 @@
 .task-form {
   max-width: 600px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 0.05rem;
   animation: slideUp 0.3s ease;
 }
 
@@ -223,7 +223,6 @@
   font-weight: 600;
 }
 
-/* Form Buttons */
 .form-buttons {
   display: flex;
   gap: 1rem;
@@ -318,4 +317,112 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 .form-select:focus {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+}
+
+.task-form-container {
+  max-width: 600px;
+  max-height: 80vh;
+  margin: 0 auto;
+  padding: 1.5rem;
+  animation: slideUp 0.3s ease;
+  overflow-y: auto;
+  position: relative;
+}
+
+@supports (scroll-behavior: smooth) {
+  .task-form-container {
+    scroll-behavior: smooth;
+  }
+}
+.task-form-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.task-form-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.task-form-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+.task-form-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6b419d 100%);
+}
+
+.scroll-button {
+  position: fixed;
+  right: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  animation: fadeIn 0.3s ease;
+}
+
+.scroll-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.scroll-button:active {
+  transform: translateY(0);
+}
+
+.scroll-button:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.scroll-top {
+  bottom: 6rem;
+}
+
+.scroll-bottom {
+  bottom: 2rem;
+}
+
+.scroll-button svg {
+  transition: transform 0.3s ease;
+}
+
+.scroll-button:hover svg {
+  transform: scale(1.1);
+}
+
+.scroll-top svg {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+  .task-form-container {
+    max-height: 70vh;
+    padding: 1rem;
+    margin: 0 0.5rem;
+  }
+
+  .scroll-button {
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+  }
+
+  .scroll-top {
+    bottom: 5.5rem;
+  }
+
+  .scroll-bottom {
+    bottom: 1.5rem;
+  }
 }
