@@ -1,0 +1,226 @@
+/* === WRAPPER === */
+.profile-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 350px;
+  height: 100vh;
+  background: white;
+  padding: 2rem;
+  box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+/* === HEADER === */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.close-btn {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+}
+.close-btn:hover {
+  color: #333;
+}
+
+/* === USER INFO === */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.user-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.user-email {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* === MENU === */
+.menu-list {
+  flex: 1;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+.menu-item:hover {
+  background: #f0f0f0;
+}
+
+.menu-icon {
+  font-size: 1.2rem;
+  width: 30px;
+  text-align: center;
+}
+
+.menu-text {
+  color: #333;
+  flex: 1;
+}
+
+/* === FORM === */
+.form-container {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.form-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+
+input:focus, textarea:focus {
+  border-color: #667eea;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* === BUTTONS === */
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  flex: 1;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-primary:hover {
+  background: #5a67d8;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  flex: 1;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+/* === HELP SUPPORT === */
+.help-box {
+  background: #e3f2fd;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.help-title {
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.help-content {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.help-contact {
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* === LOGOUT === */
+.logout-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: blue;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 100px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size:1rem;
+  margin-top: auto;
+  transition: 0.3s;
+}
+.logout-btn:hover {
+  background:blue;
+  transform: scale(1.2);
+}
