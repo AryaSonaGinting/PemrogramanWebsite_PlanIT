@@ -1,10 +1,11 @@
-// src/components/Dashboard.js (updated)
+// src/components/Dashboard.js (updated welcome screens section)
 import React, { useState, useEffect } from 'react';
 import TaskManager from './TaskManager';
 
-const Dashboard = ({ onLogout }) => {
+const Dashboard = ({ onLogout, onSwitchAccount }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showMainDashboard, setShowMainDashboard] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   // Check if user has already completed onboarding
   useEffect(() => {
@@ -16,14 +17,14 @@ const Dashboard = ({ onLogout }) => {
 
   const welcomeMessages = [
     {
-      title: "Selamat datang di Planit",
+      title: "Selamat datang di PlanIT!",
       description: "Tempat kamu mengatur ide dan rencana besar hidupmu.",
-      buttonText: "Next"
+      buttonText: "Next >"
     },
     {
       title: "Mulailah dengan satu tugas kecil hari ini",
       description: "Lihat dampaknya besok 😊",
-      buttonText: "Get Started"
+      buttonText: "Get Started?"
     }
   ];
 
@@ -36,16 +37,9 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  const handleLogout = () => {
-    // Clear all user data
-    localStorage.removeItem('planit-hasSeenOnboarding');
-    // Note: We keep tasks in localStorage so they persist between logins
-    onLogout();
-  };
-
-  if (showMainDashboard) {
-    return <TaskManager onLogout={handleLogout} />;
-  }
+ if (showMainDashboard) {
+  return <TaskManager onLogout={onLogout} onSwitchAccount={onSwitchAccount} />;
+}
 
   const styles = {
     dashboard: {
@@ -58,10 +52,13 @@ const Dashboard = ({ onLogout }) => {
       padding: '2rem',
       position: 'relative'
     },
-    logoutButton: {
+    profileButton: {
       position: 'absolute',
       top: '1rem',
       right: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
       background: 'rgba(255, 255, 255, 0.2)',
       color: 'white',
       border: '1px solid rgba(255, 255, 255, 0.3)',
@@ -70,6 +67,18 @@ const Dashboard = ({ onLogout }) => {
       cursor: 'pointer',
       fontSize: '0.9rem',
       transition: 'all 0.3s ease'
+    },
+    avatarSmall: {
+      width: '25px',
+      height: '25px',
+      borderRadius: '50%',
+      background: 'white',
+      color: '#667eea',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: 'bold',
+      fontSize: '0.8rem'
     },
     welcomeContainer: {
       textAlign: 'center',
@@ -102,8 +111,8 @@ const Dashboard = ({ onLogout }) => {
   return (
     <div style={styles.dashboard}>
       <button 
-        style={styles.logoutButton}
-        onClick={handleLogout}
+        style={styles.profileButton}
+        onClick={() => setShowProfile(true)}
         onMouseEnter={(e) => {
           e.target.style.background = 'rgba(255, 255, 255, 0.3)';
         }}
@@ -111,7 +120,10 @@ const Dashboard = ({ onLogout }) => {
           e.target.style.background = 'rgba(255, 255, 255, 0.2)';
         }}
       >
-        Logout
+        <div style={styles.avatarSmall}>
+          U
+        </div>
+        <span>Profile</span>
       </button>
       
       <div style={styles.welcomeContainer}>
