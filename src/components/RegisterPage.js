@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './RegisterPage.css';
 
 const RegisterPage = ({ onNavigate, onRegister }) => {
   const [formData, setFormData] = useState({
@@ -232,3 +233,4 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
 };
 
 export default RegisterPage;
+
