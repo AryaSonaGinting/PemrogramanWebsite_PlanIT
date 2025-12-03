@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './LoginPage.css';
 
 const LoginPage = ({ onNavigate, onLogin }) => {
   const [formData, setFormData] = useState({
@@ -208,3 +209,4 @@ const LoginPage = ({ onNavigate, onLogin }) => {
 };
 
 export default LoginPage;
+
