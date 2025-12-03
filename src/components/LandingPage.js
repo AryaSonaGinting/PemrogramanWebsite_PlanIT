@@ -1,4 +1,5 @@
 import React from 'react';
+import './LandingPage.css';
 
 const LandingPage = ({ onNavigate }) => {
   const styles = {
@@ -94,3 +95,4 @@ const LandingPage = ({ onNavigate }) => {
 };
 
 export default LandingPage;
+
