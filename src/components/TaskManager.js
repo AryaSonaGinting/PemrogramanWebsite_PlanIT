@@ -5,6 +5,7 @@ import ProgressChart from './ProgressChart';
 import Notification from './Notification';
 import Clock from './Clock';
 import Profile from './Profile';
+import './TaskManager.css';
 
 const TaskManager = ({ onLogout, onSwitchAccount }) => {
   const [tasks, setTasks] = useState([]);
@@ -313,3 +314,4 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
 };
 
 export default TaskManager;
+
