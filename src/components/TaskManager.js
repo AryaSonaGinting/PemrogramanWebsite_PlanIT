@@ -44,7 +44,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
   };
 
   const updateTask = (updatedTask) => {
-    setTasks(tasks.map(task => 
+    setTasks(tasks.map(task =>
       task.id === updatedTask.id ? updatedTask : task
     ));
     setShowForm(false);
@@ -58,16 +58,16 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
   };
 
   const toggleTaskCompletion = (taskId) => {
-    setTasks(tasks.map(task => 
+    setTasks(tasks.map(task =>
       task.id === taskId ? { ...task, completed: !task.completed } : task
     ));
   };
-  
+
   const startEditing = (task) => {
     setEditingTask(task);
     setShowForm(true);
   };
-  
+
   const cancelEditing = () => {
     setShowForm(false);
     setEditingTask(null);
@@ -102,7 +102,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
     headerRight: {
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center', 
+      alignItems: 'center',
       gap: '1rem',
       minWidth: '200px',
     },
@@ -131,7 +131,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
     },
     sidebar: {
       flex: 1,
-      minWidth: '350px',
+      minWidth: '400px',
     },
     profileButton: {
       position: 'absolute',
@@ -174,13 +174,13 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
   };
 
   const AddTaskButton = (
-    <button 
+    <button
       className="add-task-button"
       onClick={() => {
         startEditing(null);
         handleShowForm();
       }}
-      style={styles.addTaskButton} 
+      style={styles.addTaskButton}
       onMouseEnter={(e) => {
         e.target.style.transform = 'translateY(-2px)';
         e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
@@ -197,7 +197,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
   return (
     <div className="task-manager">
       <div className="task-manager-container">
-        <button 
+        <button
           style={styles.profileButton}
           onClick={handleShowProfile}
           onMouseEnter={(e) => {
@@ -218,11 +218,10 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
 
           <h1 className="app-title">PlanIT</h1>
 
-          <div style={styles.headerRight}>
-          </div>
+          <div style={styles.headerRight}></div>
         </header>
-        
-        {!showForm && !editingTask && ( 
+
+        {!showForm && !editingTask && (
           <div className="task-list-controls-above">
             {AddTaskButton}
           </div>
@@ -231,30 +230,31 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
         <div style={styles.content} className="task-manager-content">
           <div style={styles.mainContent} className="task-manager-main-content">
             {showForm ? (
-              <TaskForm 
-                task={editingTask}
-                onSave={editingTask ? updateTask : addTask}
-                onCancel={cancelEditing}
-              />
+              <div className="task-form-wrapper-override">
+                <TaskForm
+                  task={editingTask}
+                  onSave={editingTask ? updateTask : addTask}
+                  onCancel={cancelEditing}
+                />
+              </div>
             ) : (
-                <>
+              <>
+                <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                  <CountdownTimer deadline={closestDeadline} />
+                </div>
 
-                    <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-                        <CountdownTimer deadline={closestDeadline} />
-                    </div>
-                    
-                    <TaskList 
-                        tasks={tasks}
-                        onEdit={startEditing}
-                        onDelete={deleteTask}
-                        onToggleComplete={toggleTaskCompletion}
-                    />
-                </>
+                <TaskList
+                  tasks={tasks}
+                  onEdit={startEditing}
+                  onDelete={deleteTask}
+                  onToggleComplete={toggleTaskCompletion}
+                />
+              </>
             )}
           </div>
 
           <div style={styles.sidebar} className="task-manager-sidebar">
-            <ProgressChart 
+            <ProgressChart
               tasks={tasks}
               progress={calculateProgress()}
             />
@@ -265,7 +265,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
       {showProfile && (
         <>
           <div style={styles.overlay} onClick={handleCloseProfile} />
-          <Profile 
+          <Profile
             user={user}
             onClose={handleCloseProfile}
             onLogout={onLogout}
@@ -275,7 +275,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
       )}
 
       {notification && (
-        <Notification 
+        <Notification
           message={notification.message}
           type={notification.type}
           onClose={() => setNotification(null)}
@@ -286,4 +286,3 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
 };
 
 export default TaskManager;
-
