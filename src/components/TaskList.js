@@ -85,8 +85,8 @@ const TaskList = ({ tasks, onEdit, onDelete, onToggleComplete }) => {
       <div className="task-list">
         <div className="empty-state">
           <div className="empty-icon">📝</div>
-          <h3 className="empty-title">Belum ada task</h3>
-          <p className="empty-description">Mulai dengan menambahkan task pertama Anda!</p>
+          <h3 className="empty-title">Tidak ada task</h3>
+          <p className="empty-description">Tambahkan task pertama Anda!</p>
         </div>
       </div>
     );
@@ -193,5 +193,6 @@ const TaskList = ({ tasks, onEdit, onDelete, onToggleComplete }) => {
     </div>
   );
 };
+
 
 export default TaskList;
