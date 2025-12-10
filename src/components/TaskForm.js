@@ -49,7 +49,6 @@ const TaskForm = ({ task, onSave, onCancel }) => {
       formElement.addEventListener('scroll', checkScrollPosition);
       setTimeout(checkScrollPosition, 100);
     }
-
     return () => {
       if (formElement) {
         formElement.removeEventListener('scroll', checkScrollPosition);
@@ -65,13 +64,11 @@ const TaskForm = ({ task, onSave, onCancel }) => {
     if (task) {
       let deadlineDate = '';
       let deadlineTime = '';
-      
       if (task.deadline) {
         const date = new Date(task.deadline);
         deadlineDate = date.toISOString().split('T')[0];
         deadlineTime = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
       }
-
       setFormData({
         title: task.title,
         description: task.description || '',
@@ -92,18 +89,15 @@ const TaskForm = ({ task, onSave, onCancel }) => {
 
   const validateForm = () => {
     const errors = {};
-
     if (!formData.title.trim()) {
       errors.title = 'Judul task harus diisi!';
     }
-
     if (formData.deadlineTime && formData.deadlineTime.trim() !== '') {
       const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
       if (!timeRegex.test(formData.deadlineTime)) {
         errors.deadlineTime = 'Format waktu tidak valid. Gunakan format HH:MM (00:00 - 23:59)';
       }
     }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -114,7 +108,6 @@ const TaskForm = ({ task, onSave, onCancel }) => {
       ...prev,
       [name]: value
     }));
-    
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
@@ -126,20 +119,16 @@ const TaskForm = ({ task, onSave, onCancel }) => {
   const handleTimeInputChange = (e) => {
     let value = e.target.value;
     value = value.replace(/[^0-9:]/g, '');
-    
     if (value.length === 2 && !value.includes(':')) {
       value = value + ':';
     }
-    
     if (value.length > 5) {
       value = value.substring(0, 5);
     }
-    
     setFormData(prev => ({
       ...prev,
       deadlineTime: value
     }));
-
     if (formErrors.deadlineTime) {
       setFormErrors(prev => ({
         ...prev,
@@ -157,17 +146,14 @@ const TaskForm = ({ task, onSave, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-
     let formattedTime = formData.deadlineTime;
     if (formattedTime && formattedTime.trim() !== '') {
       const [hours, minutes] = formattedTime.split(':');
       formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
-
     let deadline = '';
     if (formData.deadlineDate) {
       if (formattedTime) {
@@ -176,13 +162,11 @@ const TaskForm = ({ task, onSave, onCancel }) => {
         deadline = `${formData.deadlineDate}T23:59:59`;
       }
     }
-
     const taskData = {
       ...formData,
       deadline,
       deadlineTime: formattedTime
     };
-
     if (task) {
       onSave(task.id, taskData);
     } else {
@@ -235,7 +219,7 @@ const TaskForm = ({ task, onSave, onCancel }) => {
       <form className="task-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label className="form-label">
-            Judul Task <span className="required">*</span>
+            Judul Task <span className="required-asterisk">*</span>
           </label>
           <input
             type="text"
@@ -278,7 +262,7 @@ const TaskForm = ({ task, onSave, onCancel }) => {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Deadline</label>
+          <label className="form-label">Masukkan Deadline:</label>
           
           <div className="deadline-container">
             <div className="date-input-container">
