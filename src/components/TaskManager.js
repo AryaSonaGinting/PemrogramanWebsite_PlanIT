@@ -5,6 +5,7 @@ import ProgressChart from './ProgressChart';
 import Notification from './Notification';
 import Clock from './Clock';
 import Profile from './Profile';
+import CountdownTimer from './CountDownTimer'; // RESTORED IMPORT
 import './TaskManager.css';
 
 const TaskManager = ({ onLogout, onSwitchAccount }) => {
@@ -15,6 +16,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
   const [showProfile, setShowProfile] = useState(false);
   const [user, setUser] = useState({ name: 'User', email: 'user@example.com' });
 
+  // Load user data from session
   useEffect(() => {
     const sessionData = localStorage.getItem('planit-session');
     if (sessionData) {
@@ -25,6 +27,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
     }
   }, []);
 
+  // Load tasks from localStorage on component mount
   useEffect(() => {
     const savedTasks = localStorage.getItem('planit-tasks');
     if (savedTasks) {
@@ -32,182 +35,141 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
     }
   }, []);
 
+  // Save tasks to localStorage whenever tasks state changes
   useEffect(() => {
     localStorage.setItem('planit-tasks', JSON.stringify(tasks));
-    checkTaskNotifications();
   }, [tasks]);
 
-  const showNotification = (message, type = 'info') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
-  const checkTaskNotifications = () => {
-    const now = new Date();
-    tasks.forEach(task => {
-      if (!task.completed && task.deadline) {
-        const deadline = new Date(task.deadline);
-        const timeDiff = deadline.getTime() - now.getTime();
-        const minutesDiff = timeDiff / (1000 * 60);
-        
-        if (minutesDiff <= 60 && minutesDiff > 0 && !task.notified) {
-          showNotification(
-            `Task "${task.title}" deadline dalam ${Math.ceil(minutesDiff)} menit!`, 
-            'warning'
-          );
-          setTasks(prev => prev.map(t => 
-            t.id === task.id ? {...t, notified: true} : t
-          ));
-        }
-      }
-    });
-  };
-
-  const addTask = (taskData) => {
-    const newTask = {
-      id: Date.now().toString(),
-      ...taskData,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      notified: false
-    };
-    setTasks(prev => [...prev, newTask]);
-    showNotification('Task berhasil ditambahkan!', 'success');
+  const addTask = (task) => {
+    setTasks([...tasks, { ...task, id: Date.now(), completed: false }]);
     setShowForm(false);
+    setNotification({ message: 'Task berhasil ditambahkan!', type: 'success' });
   };
 
-  const updateTask = (taskId, updates) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId ? { ...task, ...updates } : task
+  const updateTask = (updatedTask) => {
+    setTasks(tasks.map(task => 
+      task.id === updatedTask.id ? updatedTask : task
     ));
-    showNotification('Task berhasil diperbarui!', 'success');
-    setEditingTask(null);
     setShowForm(false);
+    setEditingTask(null);
+    setNotification({ message: 'Task berhasil diupdate!', type: 'success' });
   };
 
   const deleteTask = (taskId) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
-    showNotification('Task berhasil dihapus!', 'success');
+    setTasks(tasks.filter(task => task.id !== taskId));
+    setNotification({ message: 'Task berhasil dihapus.', type: 'error' });
   };
 
   const toggleTaskCompletion = (taskId) => {
-    setTasks(prev => prev.map(task => 
+    setTasks(tasks.map(task => 
       task.id === taskId ? { ...task, completed: !task.completed } : task
     ));
+    // Optional: show notification
   };
-
+  
   const startEditing = (task) => {
     setEditingTask(task);
     setShowForm(true);
   };
-
+  
   const cancelEditing = () => {
-    setEditingTask(null);
     setShowForm(false);
+    setEditingTask(null);
   };
 
   const calculateProgress = () => {
     if (tasks.length === 0) return 0;
-    const completedTasks = tasks.filter(task => task.completed).length;
-    return Math.round((completedTasks / tasks.length) * 100);
+    const completed = tasks.filter(task => task.completed).length;
+    return Math.round((completed / tasks.length) * 100);
   };
 
-  const handleProfileClick = () => {
-    setShowProfile(true);
+  // RESTORED: Find the closest deadline for CountdownTimer
+  const closestDeadline = tasks
+    .filter(task => !task.completed && task.deadline && new Date(task.deadline).getTime() > new Date().getTime())
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))[0]?.deadline;
+
+  // Profile handling
+  const handleShowProfile = () => setShowProfile(true);
+  const handleCloseProfile = () => setShowProfile(false);
+
+  // Helper for showing form from the button
+  const handleShowForm = () => {
+    setEditingTask(null);
+    setShowForm(true);
   };
 
-  const handleCloseProfile = () => {
-    setShowProfile(false);
-  };
-
+  // Inline styles object
   const styles = {
-    taskManager: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '2rem'
-    },
-    container: {
-      maxWidth: '1200px',
-      margin: '0 auto'
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: '2rem',
-      color: 'white',
-      position: 'relative'
-    },
     headerLeft: {
       display: 'flex',
-      flexDirection: 'column',
-      gap: '0.5rem'
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      gap: '0.5rem',
+      minWidth: '200px',
     },
-    title: {
-      fontSize: '2.5rem',
-      fontWeight: 'bold'
-    },
-    subtitle: {
-      fontSize: '1rem',
-      opacity: 0.9
-    },
+    // headerRight can now be simple or empty, as the timer moved
     headerRight: {
       display: 'flex',
-      alignItems: 'center',
-      gap: '2rem'
+      flexDirection: 'column',
+      alignItems: 'center', 
+      gap: '1rem',
+      minWidth: '200px',
+    },
+    addTaskButton: {
+      padding: '0.75rem 1.5rem',
+      borderRadius: '25px',
+      fontSize: '1rem',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      background: 'white',
+      color: '#667eea',
+      border: 'none',
+      cursor: 'pointer',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    },
+    content: {
+      display: 'flex',
+      gap: '2rem',
+      alignItems: 'flex-start',
+      paddingTop: '2rem',
+      flexWrap: 'wrap',
+    },
+    mainContent: {
+      flex: 3,
+      minWidth: '0',
+    },
+    sidebar: {
+      flex: 1,
+      minWidth: '350px',
     },
     profileButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.75rem',
+      position: 'absolute',
+      top: '2rem',
+      right: '2rem',
       background: 'rgba(255, 255, 255, 0.2)',
-      color: 'white',
-      border: '1px solid rgba(255, 255, 255, 0.3)',
       padding: '0.5rem 1rem',
       borderRadius: '25px',
+      color: 'white',
+      border: 'none',
       cursor: 'pointer',
-      fontSize: '0.9rem',
-      transition: 'all 0.3s ease'
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      zIndex: 100,
     },
     avatarSmall: {
-      width: '30px',
-      height: '30px',
+      width: '24px',
+      height: '24px',
       borderRadius: '50%',
       background: 'white',
       color: '#667eea',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      fontSize: '0.8rem',
       fontWeight: 'bold',
-      fontSize: '0.9rem'
-    },
-    btnPrimary: {
-      background: 'white',
-      color: '#667eea',
-      border: 'none',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '25px',
-      cursor: 'pointer',
-      fontWeight: '600',
-      fontSize: '1rem',
-      transition: 'all 0.3s ease'
-    },
-    content: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 400px',
-      gap: '2rem',
-      alignItems: 'start'
-    },
-    mainContent: {
-      background: 'white',
-      borderRadius: '20px',
-      padding: '2rem',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
-    },
-    sidebar: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '2rem'
     },
     overlay: {
       position: 'fixed',
@@ -216,55 +178,72 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
       right: 0,
       bottom: 0,
       background: 'rgba(0, 0, 0, 0.5)',
-      zIndex: 999
-    }
+      zIndex: 999,
+    },
   };
 
+  const AddTaskButton = (
+    <button 
+      className="add-task-button"
+      onClick={() => {
+        startEditing(null);
+        handleShowForm();
+      }}
+      style={styles.addTaskButton} 
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'translateY(-2px)';
+        e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+      }}
+    >
+      + Tambah Task
+    </button>
+  );
+
   return (
-    <div style={styles.taskManager}>
-      <div style={styles.container}>
-        <header style={styles.header}>
+    <div className="task-manager">
+      <div className="task-manager-container">
+        {/* Profile Button */}
+        <button 
+          style={styles.profileButton}
+          onClick={handleShowProfile}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+          }}
+        >
+          <div style={styles.avatarSmall}>U</div>
+          <span>Profile</span>
+        </button>
+
+        {/* Header Styles */}
+        <header className="task-manager-header">
           <div style={styles.headerLeft}>
-            <h1 style={styles.title}>PlanIt Dashboard</h1>
-            <p style={styles.subtitle}>Kelola tugas Anda dengan mudah</p>
-          </div>
-          
-          <div style={styles.headerRight}>
             <Clock />
-            <button 
-              style={styles.profileButton}
-              onClick={handleProfileClick}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-              }}
-            >
-              <div style={styles.avatarSmall}>
-                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-              </div>
-              <span>{user.name || 'User'}</span>
-            </button>
-            <button 
-              style={styles.btnPrimary}
-              onClick={() => setShowForm(true)}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
-              }}
-            >
-              + Tambah Task
-            </button>
+          </div>
+
+          {/* NEW: Place the title H1 *outside* the headerLeft/headerRight divs */}
+          <h1 className="app-title">PlanIT</h1>
+
+          {/* headerRight is now empty */}
+          <div style={styles.headerRight}>
           </div>
         </header>
+        
+        {/* NEW BUTTON POSITION: Above TaskList, visible when form is NOT showing */}
+        {!showForm && !editingTask && ( 
+          <div className="task-list-controls-above">
+            {AddTaskButton}
+          </div>
+        )}
 
-        <div style={styles.content}>
-          <div style={styles.mainContent}>
+        <div style={styles.content} className="task-manager-content">
+          <div style={styles.mainContent} className="task-manager-main-content">
             {showForm ? (
               <TaskForm 
                 task={editingTask}
@@ -272,16 +251,23 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
                 onCancel={cancelEditing}
               />
             ) : (
-              <TaskList 
-                tasks={tasks}
-                onEdit={startEditing}
-                onDelete={deleteTask}
-                onToggleComplete={toggleTaskCompletion}
-              />
+                <>
+                    {/* NEW TIMER POSITION: Moved above TaskList */}
+                    <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                        <CountdownTimer deadline={closestDeadline} />
+                    </div>
+                    
+                    <TaskList 
+                        tasks={tasks}
+                        onEdit={startEditing}
+                        onDelete={deleteTask}
+                        onToggleComplete={toggleTaskCompletion}
+                    />
+                </>
             )}
           </div>
 
-          <div style={styles.sidebar}>
+          <div style={styles.sidebar} className="task-manager-sidebar">
             <ProgressChart 
               tasks={tasks}
               progress={calculateProgress()}
@@ -297,7 +283,7 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
             user={user}
             onClose={handleCloseProfile}
             onLogout={onLogout}
-            onSwitchToLogin={onSwitchAccount} // ADD THIS LINE
+            onSwitchToLogin={onSwitchAccount}
           />
         </>
       )}
@@ -314,4 +300,3 @@ const TaskManager = ({ onLogout, onSwitchAccount }) => {
 };
 
 export default TaskManager;
-
