@@ -31,4 +31,4 @@ const Tasks = db.define('tasks', {
 Users.hasMany(Tasks);
 Tasks.belongsTo(Users, { foreignKey: 'userId' });
 
-module.exports = Tasks;
+module.exports = Task;
