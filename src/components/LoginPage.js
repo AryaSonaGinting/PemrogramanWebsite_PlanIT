@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // <--- Kita panggil kurirnya
 import './LoginPage.css';
 
 const LoginPage = ({ onNavigate, onLogin }) => {
@@ -6,6 +7,10 @@ const LoginPage = ({ onNavigate, onLogin }) => {
     email: '',
     password: ''
   });
+
+  // State untuk menangani pesan error/loading
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const styles = {
     loginPage: {
@@ -66,7 +71,8 @@ const LoginPage = ({ onNavigate, onLogin }) => {
       borderRadius: '25px',
       cursor: 'pointer',
       fontWeight: '600',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.3s ease',
+      opacity: loading ? 0.7 : 1 // Efek transparan kalau loading
     },
     btnFull: {
       width: '100%',
@@ -94,6 +100,12 @@ const LoginPage = ({ onNavigate, onLogin }) => {
       color: '#666',
       cursor: 'pointer',
       fontSize: '0.9rem'
+    },
+    errorMessage: {
+      color: 'red',
+      textAlign: 'center',
+      marginBottom: '1rem',
+      fontSize: '0.9rem'
     }
   };
 
@@ -102,24 +114,51 @@ const LoginPage = ({ onNavigate, onLogin }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    setError(''); // Hapus pesan error saat user mengetik ulang
   };
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
-  console.log('Login data:', formData);
-  onLogin(formData.email);
-};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true); // Mulai loading
+    setError('');
+
+    try {
+      // --- INI BAGIAN KONEKSI KE VERCEL ---
+      const response = await axios.post('https://planit-backend-two.vercel.app/login', {
+        email: formData.email,
+        password: formData.password
+      });
+
+      console.log('Login Berhasil:', response.data);
+      
+      // Kirim data user yang asli ke App.js
+      onLogin(response.data); 
+      
+      // Opsional: Langsung pindah halaman (kalau onLogin tidak handle navigasi)
+      // onNavigate('dashboard'); 
+
+    } catch (err) {
+      console.error('Login Gagal:', err);
+      // Tampilkan pesan error dari backend atau pesan default
+      setError(err.response?.data?.msg || 'Email atau Password salah!');
+    } finally {
+      setLoading(false); // Selesai loading
+    }
+  };
 
   return (
     <div style={styles.loginPage}>
       <div style={styles.loginContainer}>
         <div style={styles.loginHeader}>
           <h1 style={styles.headerTitle}>Welcome Back!</h1>
-          <p style={styles.headerSubtitle}>Lorem ipsum dolor sit amet</p>
+          <p style={styles.headerSubtitle}>Please login to your account</p>
         </div>
         
         <form style={styles.loginForm} onSubmit={handleSubmit}>
           <h2 style={styles.formTitle}>Login</h2>
+
+          {/* Menampilkan Error jika ada */}
+          {error && <p style={styles.errorMessage}>{error}</p>}
           
           <div style={styles.formGroup}>
             <input
@@ -159,17 +198,22 @@ const LoginPage = ({ onNavigate, onLogin }) => {
           
           <button 
             type="submit" 
+            disabled={loading} // Tombol mati saat loading
             style={{...styles.btnPrimary, ...styles.btnFull}}
             onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+              if(!loading) {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              if(!loading) {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }
             }}
           >
-            Login
+            {loading ? 'Loading...' : 'Login'}
           </button>
           
           <div style={styles.formFooter}>
@@ -209,4 +253,3 @@ const LoginPage = ({ onNavigate, onLogin }) => {
 };
 
 export default LoginPage;
-
