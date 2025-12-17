@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Memanggil kurir Axios
+import axios from 'axios';
 import './RegisterPage.css';
 
 const RegisterPage = ({ onNavigate }) => {
@@ -46,7 +46,8 @@ const RegisterPage = ({ onNavigate }) => {
       padding: '1rem',
       border: '2px solid #e1e1e1',
       borderRadius: '10px',
-      fontSize: '1rem'
+      fontSize: '1rem',
+      boxSizing: 'border-box' // Ditambahkan agar padding tidak merusak lebar
     },
     btnPrimary: {
       background: '#667eea',
@@ -82,8 +83,8 @@ const RegisterPage = ({ onNavigate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validasi sederhana: Cek apakah password cocok
-    if (formData.password !== formData.confirmPassword) {
+    // 1. Validasi di Frontend (Opsional tapi bagus)
+    if (formData.password.trim() !== formData.confirmPassword.trim()) {
       return setError('Password tidak cocok!');
     }
 
@@ -91,23 +92,24 @@ const RegisterPage = ({ onNavigate }) => {
     setError('');
 
     try {
-      // --- KONEKSI KE BACKEND VERCEL ---
+      // --- PERBAIKAN: Mengirim confirmPassword agar diterima Backend ---
       const response = await axios.post('https://planit-backend-two.vercel.app/register', {
         username: formData.username,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        confirmPassword: formData.confirmPassword // INI YANG TADI KURANG
       });
 
       console.log('Registrasi Berhasil:', response.data);
       setSuccess(true);
       
-      // Tunggu 2 detik lalu pindah ke halaman login otomatis
       setTimeout(() => {
         onNavigate('login');
       }, 2000);
 
     } catch (err) {
       console.error('Registrasi Gagal:', err);
+      // Menampilkan pesan error asli dari Backend kamu di Auth.js
       setError(err.response?.data?.msg || 'Registrasi gagal, coba email lain.');
     } finally {
       setLoading(false);
@@ -175,7 +177,7 @@ const RegisterPage = ({ onNavigate }) => {
 
         <p style={{textAlign: 'center', marginTop: '1rem'}}>
           Already have an account?{' '}
-          <span style={{color: '#667eea', cursor: 'pointer'}} onClick={() => onNavigate('login')}>
+          <span style={{color: '#667eea', cursor: 'pointer', fontWeight: 'bold'}} onClick={() => onNavigate('login')}>
             Login here
           </span>
         </p>
