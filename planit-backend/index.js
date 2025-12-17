@@ -13,22 +13,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Koneksi Database
-(async () => {
-    try {
-        await db.authenticate();
+db.authenticate()
+    .then(() => {
         console.log('Database Connected...');
-        
-        // --- PENTING ---
-        // Hapus tanda komentar "//" di baris bawah ini HANYA saat pertama kali dijalankan.
-        // Tujuannya untuk menyuruh database membuat tabel Users dan Tasks.
-        // Setelah tabel jadi, kasih komentar "//" lagi ya.
-        
-        await db.sync(); 
-        
-    } catch (error) {
-        console.error(error);
-    }
-})();
+        return db.sync(); // Membuat tabel otomatis jika belum ada
+    })
+    .catch(err => {
+        console.error('Database connection error:', err);
+    });
 
 app.use(cors());
 app.use(express.json());
