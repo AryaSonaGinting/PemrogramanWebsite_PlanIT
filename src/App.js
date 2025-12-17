@@ -86,41 +86,21 @@ function App() {
     setCurrentPage(page);
   };
 
-// 1. Perbaiki handleLogin agar menyimpan ID dari backend
-  const handleLogin = (userDataFromBackend) => {
+const handleLogin = (userDataFromBackend) => {
+    // Backend mengirim objek: { id, username, email, msg }
+    // Kita ambil username dan email aslinya
     const userData = {
-      id: userDataFromBackend.id, // <--- SANGAT PENTING: Ambil ID dari database
       name: userDataFromBackend.username, 
       email: userDataFromBackend.email,
       joinedDate: new Date().toISOString()
     };
     
+    // Simpan ke localStorage supaya tetap login saat refresh
     SessionManager.login(userData);
     setIsLoggedIn(true);
     setCurrentPage('dashboard');
   };
 
-  // 2. Perbaiki bagian pengecekan login (Baris 114)
-  if (isLoggedIn) {
-    return (
-      <Dashboard
-        onLogout={handleLogout}
-        onSwitchAccount={handleSwitchAccount}
-        user={SessionManager.getUser()} // <--- TAMBAHKAN PROP USER DI SINI
-      />
-    );
-  }
-
-  // 2. Perbaiki bagian pengecekan login (Baris 114)
-  if (isLoggedIn) {
-    return (
-      <Dashboard
-        onLogout={handleLogout}
-        onSwitchAccount={handleSwitchAccount}
-        user={SessionManager.getUser()} // <--- TAMBAHKAN PROP USER DI SINI
-      />
-    );
-  }
   const handleRegister = (formData) => {
     const userData = {
       name: formData.username || formData.name || 'User',
