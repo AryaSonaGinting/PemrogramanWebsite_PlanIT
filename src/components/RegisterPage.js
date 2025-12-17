@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Memanggil kurir Axios
 import './RegisterPage.css';
 
-const RegisterPage = ({ onNavigate, onRegister }) => {
+const RegisterPage = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const styles = {
     registerPage: {
@@ -27,16 +32,11 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
       maxWidth: '450px',
       position: 'relative'
     },
-    registerHeader: {
-      textAlign: 'center',
-      marginBottom: '2rem'
-    },
     headerTitle: {
       color: '#333',
-      fontSize: '2rem'
-    },
-    registerForm: {
-      marginBottom: '1rem'
+      marginBottom: '0.5rem',
+      fontSize: '2rem',
+      textAlign: 'center'
     },
     formGroup: {
       marginBottom: '1.5rem'
@@ -46,45 +46,28 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
       padding: '1rem',
       border: '2px solid #e1e1e1',
       borderRadius: '10px',
-      fontSize: '1rem',
-      transition: 'border-color 0.3s ease'
+      fontSize: '1rem'
     },
     btnPrimary: {
       background: '#667eea',
       color: 'white',
       border: 'none',
-      padding: '1rem 2.5rem',
+      padding: '1rem',
       borderRadius: '25px',
       cursor: 'pointer',
-      fontWeight: '600',
-      transition: 'all 0.3s ease'
-    },
-    btnFull: {
       width: '100%',
-      padding: '1rem',
-      fontSize: '1rem',
-      marginBottom: '1.5rem'
+      fontWeight: '600',
+      opacity: loading ? 0.7 : 1
     },
-    formFooter: {
-      textAlign: 'center'
+    errorMessage: {
+      color: 'red',
+      textAlign: 'center',
+      marginBottom: '1rem'
     },
-    footerText: {
-      color: '#666'
-    },
-    link: {
-      color: '#667eea',
-      cursor: 'pointer',
-      fontWeight: '600'
-    },
-    btnBack: {
-      position: 'absolute',
-      top: '1rem',
-      left: '1rem',
-      background: 'transparent',
-      border: 'none',
-      color: '#666',
-      cursor: 'pointer',
-      fontSize: '0.9rem'
+    successMessage: {
+      color: 'green',
+      textAlign: 'center',
+      marginBottom: '1rem'
     }
   };
 
@@ -93,22 +76,53 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    setError('');
   };
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
-  console.log('Register data:', formData);
-  onRegister(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validasi sederhana: Cek apakah password cocok
+    if (formData.password !== formData.confirmPassword) {
+      return setError('Password tidak cocok!');
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // --- KONEKSI KE BACKEND VERCEL ---
+      const response = await axios.post('https://planit-backend-two.vercel.app/register', {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+
+      console.log('Registrasi Berhasil:', response.data);
+      setSuccess(true);
+      
+      // Tunggu 2 detik lalu pindah ke halaman login otomatis
+      setTimeout(() => {
+        onNavigate('login');
+      }, 2000);
+
+    } catch (err) {
+      console.error('Registrasi Gagal:', err);
+      setError(err.response?.data?.msg || 'Registrasi gagal, coba email lain.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={styles.registerPage}>
       <div style={styles.registerContainer}>
-        <div style={styles.registerHeader}>
-          <h1 style={styles.headerTitle}>Register Now!</h1>
-        </div>
+        <h1 style={styles.headerTitle}>Create Account</h1>
         
-        <form style={styles.registerForm} onSubmit={handleSubmit}>
+        {error && <p style={styles.errorMessage}>{error}</p>}
+        {success && <p style={styles.successMessage}>Akun berhasil dibuat! Mengalihkan ke Login...</p>}
+
+        <form onSubmit={handleSubmit}>
           <div style={styles.formGroup}>
             <input
               type="text"
@@ -118,15 +132,8 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
               onChange={handleChange}
               required
               style={styles.input}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e1e1e1';
-              }}
             />
           </div>
-          
           <div style={styles.formGroup}>
             <input
               type="email"
@@ -136,15 +143,8 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
               onChange={handleChange}
               required
               style={styles.input}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e1e1e1';
-              }}
             />
           </div>
-          
           <div style={styles.formGroup}>
             <input
               type="password"
@@ -154,15 +154,8 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
               onChange={handleChange}
               required
               style={styles.input}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e1e1e1';
-              }}
             />
           </div>
-          
           <div style={styles.formGroup}>
             <input
               type="password"
@@ -172,65 +165,23 @@ const RegisterPage = ({ onNavigate, onRegister }) => {
               onChange={handleChange}
               required
               style={styles.input}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e1e1e1';
-              }}
             />
           </div>
           
-          <button 
-            type="submit" 
-            style={{...styles.btnPrimary, ...styles.btnFull}}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-            }}
-          >
-            Register
+          <button type="submit" disabled={loading} style={styles.btnPrimary}>
+            {loading ? 'Processing...' : 'Register Now'}
           </button>
-          
-          <div style={styles.formFooter}>
-            <p style={styles.footerText}>
-              Have an account?{' '}
-              <span 
-                style={styles.link} 
-                onClick={() => onNavigate('login')}
-                onMouseEnter={(e) => {
-                  e.target.style.textDecoration = 'underline';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.textDecoration = 'none';
-                }}
-              >
-                Login
-              </span>
-            </p>
-          </div>
         </form>
-        
-        <button 
-          style={styles.btnBack} 
-          onClick={() => onNavigate('landing')}
-          onMouseEnter={(e) => {
-            e.target.style.color = '#333';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.color = '#666';
-          }}
-        >
-          ← Back to Home
-        </button>
+
+        <p style={{textAlign: 'center', marginTop: '1rem'}}>
+          Already have an account?{' '}
+          <span style={{color: '#667eea', cursor: 'pointer'}} onClick={() => onNavigate('login')}>
+            Login here
+          </span>
+        </p>
       </div>
     </div>
   );
 };
 
 export default RegisterPage;
-
