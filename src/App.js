@@ -110,6 +110,17 @@ function App() {
       />
     );
   }
+
+  // 2. Perbaiki bagian pengecekan login (Baris 114)
+  if (isLoggedIn) {
+    return (
+      <Dashboard
+        onLogout={handleLogout}
+        onSwitchAccount={handleSwitchAccount}
+        user={SessionManager.getUser()} // <--- TAMBAHKAN PROP USER DI SINI
+      />
+    );
+  }
   const handleRegister = (formData) => {
     const userData = {
       name: formData.username || formData.name || 'User',
