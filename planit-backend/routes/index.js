@@ -10,8 +10,7 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 
-// --- Jalur Tasks ---
-router.get('/tasks', getTasks);
-router.post('/tasks', createTask);
+router.get('/tasks/:userId', getTasks);
+router.post('/tasks', createTasks);
 
 module.exports = router;
