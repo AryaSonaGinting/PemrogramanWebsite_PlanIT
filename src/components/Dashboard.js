@@ -1,13 +1,13 @@
+// src/components/Dashboard.js (updated welcome screens section)
 import React, { useState, useEffect } from 'react';
 import TaskManager from './TaskManager';
 
-// Tambahkan 'user' ke dalam props yang diterima
-const Dashboard = ({ onLogout, onSwitchAccount, user }) => {
+const Dashboard = ({ onLogout, onSwitchAccount }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showMainDashboard, setShowMainDashboard] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  // Cek apakah user sudah pernah melewati onboarding
+  // Check if user has already completed onboarding
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('planit-hasSeenOnboarding');
     if (hasSeenOnboarding === 'true') {
@@ -37,13 +37,11 @@ const Dashboard = ({ onLogout, onSwitchAccount, user }) => {
     }
   };
 
-  // BAGIAN PENTING: Meneruskan data 'user' ke TaskManager
   if (showMainDashboard) {
     return (
       <TaskManager
         onLogout={onLogout}
         onSwitchAccount={onSwitchAccount}
-        user={user} // Prop user dikirim ke sini
       />
     );
   }
@@ -120,10 +118,14 @@ const Dashboard = ({ onLogout, onSwitchAccount, user }) => {
       <button
         style={styles.profileButton}
         onClick={() => setShowProfile(true)}
+        onMouseEnter={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+        }}
       >
-        <div style={styles.avatarSmall}>
-          {user?.name?.charAt(0).toUpperCase() || 'U'}
-        </div>
+        <div style={styles.avatarSmall}>U</div>
         <span>Profile</span>
       </button>
 
@@ -138,6 +140,14 @@ const Dashboard = ({ onLogout, onSwitchAccount, user }) => {
           <button
             style={styles.btnPrimary}
             onClick={handleNext}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
           >
             {welcomeMessages[currentStep].buttonText}
           </button>
