@@ -4,68 +4,22 @@ import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import Dashboard from './components/Dashboard';
 
-// Session Manager Utility
+// Session Manager tetap sama, pastikan data 'id' ikut tersimpan
 const SessionManager = {
-  // Save user session
-  login: (userData = {}) => {
-   
-    const defaultUser = {
-      name: userData.name || 'User',
-      email: userData.email || 'user@example.com',
-      joinedDate: userData.joinedDate || new Date().toISOString()
-    };
-    
+  login: (userData) => {
     localStorage.setItem('planit-session', JSON.stringify({
       isLoggedIn: true,
-      user: defaultUser,
+      user: userData,
       loginTime: new Date().toISOString()
     }));
-    
-    return defaultUser;
   },
-
-  getSession: () => {
-    const session = localStorage.getItem('planit-session');
-    return session ? JSON.parse(session) : null;
-  },
-
+  getSession: () => JSON.parse(localStorage.getItem('planit-session')),
   isLoggedIn: () => {
     const session = SessionManager.getSession();
-    if (!session) return false;
-    
-    const loginTime = new Date(session.loginTime);
-    const now = new Date();
-    const daysDiff = (now - loginTime) / (1000 * 60 * 60 * 24);
-    
-    if (daysDiff > 7) {
-      SessionManager.logout();
-      return false;
-    }
-    
-    return session.isLoggedIn === true;
+    return session ? session.isLoggedIn : false;
   },
-
-  // Logout
-  logout: () => {
-    localStorage.removeItem('planit-session');
-  },
-
-  // Get user data
-  getUser: () => {
-    const session = SessionManager.getSession();
-    return session ? session.user : null;
-  },
-  
-  updateUser: (updates) => {
-    const session = SessionManager.getSession();
-    if (session && session.user) {
-      const updatedUser = { ...session.user, ...updates };
-      session.user = updatedUser;
-      localStorage.setItem('planit-session', JSON.stringify(session));
-      return updatedUser;
-    }
-    return null;
-  }
+  logout: () => localStorage.removeItem('planit-session'),
+  getUser: () => SessionManager.getSession()?.user || null
 };
 
 function App() {
@@ -79,30 +33,13 @@ function App() {
     }
   }, []);
 
-  const handleNavigation = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handleLogin = (email) => {
-    const username = email.split('@')[0];
+  const handleLogin = (userDataFromBackend) => {
+    // MENYIMPAN ID DARI NEON
     const userData = {
-      name: username.charAt(0).toUpperCase() + username.slice(1),
-      email: email,
-      joinedDate: new Date().toISOString()
+      id: userDataFromBackend.id, 
+      name: userDataFromBackend.username,
+      email: userDataFromBackend.email
     };
-    
-    SessionManager.login(userData);
-    setIsLoggedIn(true);
-    setCurrentPage('dashboard');
-  };
-
-  const handleRegister = (formData) => {
-    const userData = {
-      name: formData.username || formData.name || 'User',
-      email: formData.email || 'user@example.com',
-      joinedDate: new Date().toISOString()
-    };
-    
     SessionManager.login(userData);
     setIsLoggedIn(true);
     setCurrentPage('dashboard');
@@ -114,33 +51,15 @@ function App() {
     setCurrentPage('landing');
   };
 
-  const handleSwitchAccount = () => {
-    SessionManager.logout();
-    setIsLoggedIn(false);
-    setCurrentPage('login');
-  };
-
   if (isLoggedIn) {
-    return <Dashboard onLogout={handleLogout} onSwitchAccount={handleSwitchAccount} />;
+    return <Dashboard onLogout={handleLogout} user={SessionManager.getUser()} />;
   }
 
   return (
     <div className="App">
-      {currentPage === 'landing' && (
-        <LandingPage onNavigate={handleNavigation} />
-      )}
-      {currentPage === 'login' && (
-        <LoginPage 
-          onNavigate={handleNavigation} 
-          onLogin={handleLogin}
-        />
-      )}
-      {currentPage === 'register' && (
-        <RegisterPage 
-          onNavigate={handleNavigation} 
-          onRegister={handleRegister}
-        />
-      )}
+      {currentPage === 'landing' && <LandingPage onNavigate={setCurrentPage} />}
+      {currentPage === 'login' && <LoginPage onNavigate={setCurrentPage} onLogin={handleLogin} />}
+      {currentPage === 'register' && <RegisterPage onNavigate={setCurrentPage} onRegister={handleLogin} />}
     </div>
   );
 }
