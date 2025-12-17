@@ -87,19 +87,24 @@ function App() {
   };
 
 const handleLogin = (userDataFromBackend) => {
-    // Backend mengirim objek: { id, username, email, msg }
-    // Kita ambil username dan email aslinya
-    const userData = {
-      name: userDataFromBackend.username, 
-      email: userDataFromBackend.email,
-      joinedDate: new Date().toISOString()
-    };
-    
-    // Simpan ke localStorage supaya tetap login saat refresh
-    SessionManager.login(userData);
-    setIsLoggedIn(true);
-    setCurrentPage('dashboard');
+  // Pastikan id, username, dan email diambil dari response backend
+  const userData = {
+    id: userDataFromBackend.id,       // INI YANG PALING PENTING
+    username: userDataFromBackend.username,
+    email: userDataFromBackend.email
   };
+
+  // Simpan ke session manager / local storage
+  const session = {
+    isLoggedIn: true,
+    user: userData
+  };
+  
+  localStorage.setItem('planit-session', JSON.stringify(session));
+  
+  setIsLoggedIn(true);
+  setCurrentPage('dashboard');
+};
 
   const handleRegister = (formData) => {
     const userData = {
