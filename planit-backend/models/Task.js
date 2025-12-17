@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const db = require('../config/db'); // Pastikan path ini benar (titik dua .. artinya mundur 1 folder)
+const db = require('../config/database'); // Pastikan path ini benar (titik dua .. artinya mundur 1 folder)
 const Users = require('./User'); 
 
 // PERBAIKAN: Gunakan db.define (bukan dsefine)
@@ -31,4 +31,4 @@ const Tasks = db.define('tasks', {
 Users.hasMany(Tasks);
 Tasks.belongsTo(Users, { foreignKey: 'userId' });
 
-module.exports = Task;
+module.exports = Tasks;

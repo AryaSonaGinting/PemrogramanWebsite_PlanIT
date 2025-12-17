@@ -1,22 +1,23 @@
 const { DataTypes } = require('sequelize');
-const db = require('../config/db');
+const db = require('../config/database');
 
-const Users = db.define('users', {
+const Users = db.define('users', { // <--- Nama variabel di sini 'Users'
     username: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowValue: false
     },
     email: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowValue: false,
         unique: true
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowValue: false
     }
 }, {
     freezeTableName: true
 });
 
-module.exports = User;
+// PASTIKAN DI SINI SAMA DENGAN NAMA DI ATAS
+module.exports = Users;
